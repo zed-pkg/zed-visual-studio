@@ -17,7 +17,10 @@
     "errorListProjection": true,
     "versionedInspectAdapter": "pending-zed-cli-191",
     "nativeUnitTests": true,
-    "repoLocalCI": true
+    "repoLocalCI": true,
+    "immutableWorkflowInputs": true,
+    "fixedRunnerImages": true,
+    "checkoutCredentialsPersisted": false
   },
   "remaining": ["VS SDK AsyncPackage", "WPF tool window", "solution/workspace listeners", "Error List UI wiring", "experimental-instance test", "signed VSIX"],
   "linearIssue": "DEN-2508"
