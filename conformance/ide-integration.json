@@ -1,0 +1,27 @@
+{
+  "schema": "zed-pkg/ide-integration-conformance/v1",
+  "integration": "visual-studio",
+  "repository": "zed-pkg/zed-visual-studio",
+  "contractVersion": 1,
+  "level": {"core": "pass", "nativeShell": "toolwindow-errorlist-model", "distribution": "repository"},
+  "capabilities": {
+    "multiRootDiscovery": "workspace-model",
+    "manifestDiagnostics": true,
+    "lockDiagnostics": true,
+    "materializationDiagnostics": true,
+    "stagingRecovery": true,
+    "argvExecution": true,
+    "boundedExecution": true,
+    "outputRedaction": true,
+    "explicitMutationConfirmation": true,
+    "errorListProjection": true,
+    "versionedInspectAdapter": "pending-zed-cli-191",
+    "nativeUnitTests": true,
+    "repoLocalCI": true,
+    "immutableWorkflowInputs": true,
+    "fixedRunnerImages": true,
+    "checkoutCredentialsPersisted": false
+  },
+  "remaining": ["VS SDK AsyncPackage", "WPF tool window", "solution/workspace listeners", "Error List UI wiring", "experimental-instance test", "signed VSIX"],
+  "linearIssue": "DEN-2508"
+}
