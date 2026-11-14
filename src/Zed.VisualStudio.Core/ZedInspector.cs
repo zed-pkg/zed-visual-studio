@@ -50,6 +50,16 @@ public sealed partial class ZedInspector {
     }
     public ZedReport Validate(ZedReport report, string root) {
         if (report.SchemaVersion != 1) return Failed(root, "Unsupported Zed inspection schema; expected schemaVersion 1.");
+        // A CLI report cannot retarget IDE diagnostics or action previews to an unrelated checkout.
+        var expectedRoot = Path.GetFullPath(root);
+        if (string.IsNullOrWhiteSpace(report.WorkspaceRoot) || !Path.IsPathFullyQualified(report.WorkspaceRoot))
+            return Failed(expectedRoot, "Zed inspection reported a different workspace root.");
+        string reportedRoot;
+        try { reportedRoot = Path.GetFullPath(report.WorkspaceRoot); }
+        catch (ArgumentException) { return Failed(expectedRoot, "Zed inspection reported an invalid workspace root."); }
+        var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        if (!string.Equals(expectedRoot, reportedRoot, comparison))
+            return Failed(expectedRoot, "Zed inspection reported a different workspace root.");
         foreach (var issue in report.Issues ?? Array.Empty<ZedIssue>()) foreach (var action in issue.Actions ?? Array.Empty<ZedAction>()) if (action.Kind == "command" && !action.RequiresConfirmation) return Failed(root, $"Rejected unsafe command action '{action.Id}'.");
         var issues = (report.Issues ?? Array.Empty<ZedIssue>()).Select(issue => issue with { Detail = Redact(issue.Detail) }).ToArray(); return report with { SchemaVersion = 1, Issues = issues };
     }

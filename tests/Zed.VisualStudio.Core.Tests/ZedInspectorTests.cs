@@ -22,5 +22,21 @@ public sealed class ZedInspectorTests {
     [Fact] public async Task AcceptsVersionOneReport() {
         var safe = new ZedReport(1, Path.GetFullPath("."), "0.1.0", []); var report = await new ZedInspector(new FakeRunner(new ZedProcessResult(0, JsonSerializer.Serialize(safe), string.Empty))).InspectAsync("."); Assert.Empty(report.Issues);
     }
+    [Fact] public async Task RejectsSpoofedWorkspaceRootFromCli() {
+        var expected = Path.GetFullPath("workspace");
+        var spoofed = new ZedReport(1, Path.GetFullPath("other-workspace"), "0.1.0", []);
+        var inspector = new ZedInspector(new FakeRunner(new ZedProcessResult(0, JsonSerializer.Serialize(spoofed), string.Empty)));
+        var result = await inspector.InspectAsync(expected);
+        Assert.Equal(expected, result.WorkspaceRoot);
+        Assert.Equal("inspect.failed", Assert.Single(result.Issues).Id);
+    }
+    [Fact] public void AcceptsNormalizedRootButRejectsRelativeRoot() {
+        var expected = Path.GetFullPath("workspace");
+        var inspector = new ZedInspector();
+        var normal = inspector.Validate(new ZedReport(1, Path.Combine(expected, "child", ".."), null, []), expected);
+        Assert.Empty(normal.Issues);
+        var rejected = inspector.Validate(new ZedReport(1, "workspace", null, []), expected);
+        Assert.Equal("inspect.failed", Assert.Single(rejected.Issues).Id);
+    }
     private sealed class FakeRunner(ZedProcessResult result) : IZedProcessRunner { public Task<ZedProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, string workingDirectory, TimeSpan timeout, CancellationToken cancellationToken) => Task.FromResult(result); }
 }
